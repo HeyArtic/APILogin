@@ -18,7 +18,7 @@ def  load_user(user_id):
 
 @app.route('/login', methods=["POST"])
 def login():
-    data = request.json
+    data = request.get_json()
     username = data.get("username")
     password = data.get("password")
 
@@ -31,11 +31,25 @@ def login():
          
     return jsonify({"message": "Credenciais inválidas"}), 400 
 
-@app.route('/logout', methods=["GET"])
+@app.route('/logout', methods=["POST"])
 @login_required
 def logout():
     logout_user()
     return jsonify({"message": "Deslogado com sucesso."})
+
+@app.route('/user', methods=["POST"])
+@login_required
+def create_user():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    if username and password:
+        user = User(username=username, password=password)
+        db.session.add(user)
+        db.session.commit()
+        return jsonify({"message": "Registrado com sucesso"})
+    return jsonify({"message": "Credenciais inválidas"}), 400 
 
 
 if __name__ == '__main__':
