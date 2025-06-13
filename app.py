@@ -70,5 +70,18 @@ def upgrade_user(id_user):
         return jsonify({"message": f"Usuário {id_user} teve a senha alterada com sucesso."})
     return jsonify({"message": "Usuário não encontrado"}), 400
 
+@app.route('/delete/<int:id_user>', methods=["DELETE"])
+def delete_user(id_user):
+    user = User.query.get(id_user)
+    if id_user == current_user.id:
+        return jsonify({"message": "Voce não tem permissão para se deletar"})
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "Usuário deletado com sucesso"})
+    
+    return jsonify({"message": "Erro ao deletar"}), 404
+
+
 if __name__ == '__main__':
     app.run(debug=True)
