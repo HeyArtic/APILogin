@@ -64,7 +64,7 @@ def upgrade_user(id_user):
     data = request.get_json()
     user = User.query.get(id_user)
 
-    if user.id != current_user.id or current_user.role != 'admin':
+    if user.id != current_user.id and current_user.role != 'admin':
         return jsonify({"message": "Você não tem permissão para fazer isso"}), 403
         
     if user and data.get("password"):
@@ -78,7 +78,10 @@ def upgrade_user(id_user):
 def delete_user(id_user):
     user = User.query.get(id_user)
 
-    if id_user == current_user.id or current_user.role != 'admin':
+    if current_user.id == id_user:
+        return jsonify({"message": "Você não tem permissão para fazer isso"})
+    
+    if current_user.role != 'admin':
         return jsonify({"message": "Você não tem permissão para fazer isso"})
     
     if user:
