@@ -38,7 +38,6 @@ def logout():
     return jsonify({"message": "Deslogado com sucesso."})
 
 @app.route('/user', methods=["POST"])
-@login_required
 def create_user():
     data = request.get_json()
     username = data.get("username")
@@ -64,6 +63,10 @@ def read_user(id_user):
 def upgrade_user(id_user):
     data = request.get_json()
     user = User.query.get(id_user)
+
+    if user.id != current_user.id or current_user.role != 'admin':
+        return jsonify({"message": "Você não tem permissão para fazer isso"}), 403
+        
     if user and data.get("password"):
         user.password = data.get("password")
         db.session.commit()
@@ -71,10 +74,13 @@ def upgrade_user(id_user):
     return jsonify({"message": "Usuário não encontrado"}), 400
 
 @app.route('/delete/<int:id_user>', methods=["DELETE"])
+@login_required
 def delete_user(id_user):
     user = User.query.get(id_user)
-    if id_user == current_user.id:
-        return jsonify({"message": "Voce não tem permissão para se deletar"})
+
+    if id_user == current_user.id or current_user.role != 'admin':
+        return jsonify({"message": "Você não tem permissão para fazer isso"})
+    
     if user:
         db.session.delete(user)
         db.session.commit()
